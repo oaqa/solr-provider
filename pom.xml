@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>edu.cmu.lti.oaqa.core.provider</groupId>
 	<artifactId>solr-provider</artifactId>
-	<version>1.0.1</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
-	<name>Solr provider for QA</name>
-	<url>https://github.com/oaqa/solr-provider</url>
+	<name>Data providers for QA</name>
+	<url>https://github.com/oaqa/providers</url>
 	<issueManagement>
 		<system>github.com</system>
-		<url>https://github.com/oaqa/solr-provider/issues</url>
+		<url>https://github.com/oaqa/providers/issues</url>
 	</issueManagement>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -25,9 +26,9 @@
 	</licenses>
 
 	<scm>
-		<url>git@github.com:oaqa/solr-provider.git</url>
-		<connection>scm:git:git@github.com:oaqa/solr-provider.git</connection>
-		<developerConnection>scm:git:git@github.com:oaqa/solr-provider.git</developerConnection>
+		<url>git@github.com:oaqa/providers.git</url>
+		<connection>scm:git:git@github.com:oaqa/providers.git</connection>
+		<developerConnection>scm:git:git@github.com:oaqa/providers.git</developerConnection>
 	</scm>
 
 	<dependencies>
