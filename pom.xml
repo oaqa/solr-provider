@@ -10,11 +10,11 @@
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
-	<name>Data providers for QA</name>
-	<url>https://github.com/oaqa/providers</url>
+	<name>Solr provider for QA</name>
+	<url>https://github.com/oaqa/solr-provider</url>
 	<issueManagement>
 		<system>github.com</system>
-		<url>https://github.com/oaqa/providers/issues</url>
+		<url>https://github.com/oaqa/solr-provider/issues</url>
 	</issueManagement>
 	<inceptionYear>2012</inceptionYear>
 	<licenses>
@@ -26,9 +26,9 @@
 	</licenses>
 
 	<scm>
-		<url>git@github.com:oaqa/providers.git</url>
-		<connection>scm:git:git@github.com:oaqa/providers.git</connection>
-		<developerConnection>scm:git:git@github.com:oaqa/providers.git</developerConnection>
+		<url>git@github.com:oaqa/solr-provider.git</url>
+		<connection>scm:git:git@github.com:oaqa/solr-provider.git</connection>
+		<developerConnection>scm:git:git@github.com:oaqa/solr-provider.git</developerConnection>
 	</scm>
 
 	<dependencies>
