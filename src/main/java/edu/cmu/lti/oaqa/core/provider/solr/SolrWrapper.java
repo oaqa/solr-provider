@@ -78,7 +78,7 @@ public final class SolrWrapper implements Closeable {
     return new EmbeddedSolrServer(coreContainer, "");
   }
 
-  protected SolrDocumentList runQuery(String q, int results) throws SolrServerException {
+  public SolrDocumentList runQuery(String q, int results) throws SolrServerException {
     SolrQuery query = new SolrQuery();
     query.setQuery(escapeQuery(q));
     query.setRows(results);
