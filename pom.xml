@@ -42,6 +42,35 @@
             <version>3.6.0</version>
         </dependency>
 
+
+        <!--These are required for solr 3.6+ versions-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-cache</artifactId>
+            <version>4.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.1.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.cmu.lti.oaqa.bio.core</groupId>
+            <artifactId>baseqa</artifactId>
+            <version>1.6.1-SNAPSHOT</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
