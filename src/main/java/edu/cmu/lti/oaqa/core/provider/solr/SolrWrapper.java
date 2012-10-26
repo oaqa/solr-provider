@@ -87,6 +87,19 @@ public final class SolrWrapper implements Closeable {
     return rsp.getResults();
   }
 
+	public String getDocumentText(String id) throws SolrServerException {
+		String q = "id:" + id;
+		SolrQuery query = new SolrQuery();
+		query.setQuery(q);
+		query.setFields("text");
+		QueryResponse rsp = server.query(query);
+		String docText = "";
+		if (rsp.getResults().getNumFound() > 0) {
+			docText = (String) rsp.getResults().get(0).getFieldValue("text");
+		}
+		return docText;
+	}
+
   private String escapeQuery(String term) {
     term = term.replace('?', ' ');
     term = term.replace('[', ' ');
