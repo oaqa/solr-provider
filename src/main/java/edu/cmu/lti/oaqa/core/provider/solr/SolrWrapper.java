@@ -87,6 +87,11 @@ public final class SolrWrapper implements Closeable {
     return rsp.getResults();
   }
 
+  public SolrDocumentList runQuery(SolrQuery query, int results) throws SolrServerException {
+    QueryResponse rsp = server.query(query);
+    return rsp.getResults();
+  }
+
 	public String getDocText(String id) throws SolrServerException {
 		String q = "id:" + id;
 		SolrQuery query = new SolrQuery();
@@ -100,7 +105,7 @@ public final class SolrWrapper implements Closeable {
 		return docText;
 	}
 
-  private String escapeQuery(String term) {
+  public String escapeQuery(String term) {
     term = term.replace('?', ' ');
     term = term.replace('[', ' ');
     term = term.replace(']', ' ');
