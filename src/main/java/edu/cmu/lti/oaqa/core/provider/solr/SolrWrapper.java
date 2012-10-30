@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -29,6 +30,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
+
 public final class SolrWrapper implements Closeable {
 
   private static final String LOCALHOST = "localhost";
@@ -92,18 +94,21 @@ public final class SolrWrapper implements Closeable {
     return rsp.getResults();
   }
 
-	public String getDocText(String id) throws SolrServerException {
-		String q = "id:" + id;
-		SolrQuery query = new SolrQuery();
-		query.setQuery(q);
-		query.setFields("text");
-		QueryResponse rsp = server.query(query);
-		String docText = "";
-		if (rsp.getResults().getNumFound() > 0) {
-			docText = (String) rsp.getResults().get(0).getFieldValue("text");
-		}
-		return docText;
-	}
+  public String getDocText(String id) throws SolrServerException {
+    String q = "id:" + id;
+    SolrQuery query = new SolrQuery();
+    query.setQuery(q);
+    query.setFields("text");
+    QueryResponse rsp = server.query(query);
+
+    String docText = "";
+    if (rsp.getResults().getNumFound() > 0) {
+      @SuppressWarnings({ "unchecked", "rawtypes" })
+      ArrayList<String> results = (ArrayList) rsp.getResults().get(0).getFieldValues("text");
+      docText = results.get(0);
+    }
+    return docText;
+  }
 
   public String escapeQuery(String term) {
     term = term.replace('?', ' ');
