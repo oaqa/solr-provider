@@ -20,6 +20,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -77,14 +79,19 @@ public final class SolrWrapper implements Closeable {
     CoreContainer coreContainer = initializer.initialize();
     return new EmbeddedSolrServer(coreContainer, "");
   }
-
-  public SolrDocumentList runQuery(String q, int results) throws SolrServerException {
+  
+  public SolrDocumentList runQuery(String q, int results, String... fields) throws SolrServerException {
     SolrQuery query = new SolrQuery();
     query.setQuery(escapeQuery(q));
     query.setRows(results);
-    query.setFields("*", "score");
-    QueryResponse rsp = server.query(query);
-    return rsp.getResults();
+    if (fields.length == 0) {
+      query.setFields("*", "score");
+    } else {
+      List<String> newFields = Arrays.asList(fields);
+      newFields.add("score");
+      query.setFields(newFields.toArray(new String[0]));
+    }
+    return runQuery(query, results);
   }
 
   public SolrDocumentList runQuery(SolrQuery query, int results) throws SolrServerException {
