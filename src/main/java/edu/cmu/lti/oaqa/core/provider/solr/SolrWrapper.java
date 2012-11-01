@@ -112,6 +112,8 @@ public final class SolrWrapper implements Closeable {
     query.setRows(results);
     query.setHighlight(true).setHighlightSnippets(1);
     query.setParam("hl.fl", field);
+    query.setParam("hl.mergeContiguous", true);
+    query.setParam("hl.fragsize", "500");
     return getDocsSnippets(query, field);
   }
 
