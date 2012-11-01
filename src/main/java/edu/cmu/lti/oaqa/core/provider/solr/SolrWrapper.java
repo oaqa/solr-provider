@@ -29,8 +29,13 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.core.CoreContainer;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
 public final class SolrWrapper implements Closeable {
 
   private static final String LOCALHOST = "localhost";
@@ -79,8 +84,9 @@ public final class SolrWrapper implements Closeable {
     CoreContainer coreContainer = initializer.initialize();
     return new EmbeddedSolrServer(coreContainer, "");
   }
-  
-  public SolrDocumentList runQuery(String q, int results, String... fields) throws SolrServerException {
+
+  public SolrDocumentList runQuery(String q, int results, String... fields)
+          throws SolrServerException {
     SolrQuery query = new SolrQuery();
     query.setQuery(escapeQuery(q));
     query.setRows(results);
@@ -91,26 +97,67 @@ public final class SolrWrapper implements Closeable {
       newFields.add("score");
       query.setFields(newFields.toArray(new String[0]));
     }
-    return runQuery(query, results);
+    return runQuery(query);
   }
 
-  public SolrDocumentList runQuery(SolrQuery query, int results) throws SolrServerException {
+  public SolrDocumentList runQuery(SolrQuery query) throws SolrServerException {
     QueryResponse rsp = server.query(query);
     return rsp.getResults();
   }
 
-	public String getDocText(String id) throws SolrServerException {
-		String q = "id:" + id;
-		SolrQuery query = new SolrQuery();
-		query.setQuery(q);
-		query.setFields("text");
-		QueryResponse rsp = server.query(query);
-		String docText = "";
-		if (rsp.getResults().getNumFound() > 0) {
-			docText = (String) rsp.getResults().get(0).getFieldValue("text");
-		}
-		return docText;
-	}
+  public List<String> getDocsSnippets(String q, int results, String field)
+          throws SolrServerException {
+    SolrQuery query = new SolrQuery();
+    query.setQuery(escapeQuery(q));
+    query.setRows(results);
+    query.setHighlight(true).setHighlightSnippets(1);
+    query.setParam("hl.fl", field);
+    return getDocsSnippets(query, field);
+  }
+
+  public List<String> getDocsSnippets(SolrQuery query, String field) throws SolrServerException {
+    QueryResponse rsp = server.query(query);
+    StringBuilder builder = new StringBuilder();
+    List<String> result = Lists.newArrayList();
+    Joiner joiner = Joiner.on("... ");
+    for (SolrDocument doc : rsp.getResults()) {
+      String id = (String) doc.getFieldValue("id");
+      if (rsp.getHighlighting().get(id) != null) {
+        List<String> snippets = rsp.getHighlighting().get(id).get(field);
+        joiner.appendTo(builder, snippets);
+      }
+      result.add(builder.toString());
+    }
+    return result;
+  }
+
+  public String getSnippetsText(String id) throws SolrServerException {
+    String q = "id:" + id;
+    SolrQuery query = new SolrQuery();
+    query.setQuery(q);
+    query.setFields("text");
+    QueryResponse rsp = server.query(query);
+    StringBuilder builder = new StringBuilder();
+    Joiner joiner = Joiner.on("... ");
+    if (rsp.getHighlighting().get(id) != null) {
+      List<String> snippets = rsp.getHighlighting().get(id).get("text");
+      joiner.appendTo(builder, snippets);
+    }
+    return builder.toString();
+  }
+
+  public String getDocText(String id) throws SolrServerException {
+    String q = "id:" + id;
+    SolrQuery query = new SolrQuery();
+    query.setQuery(q);
+    query.setFields("text");
+    QueryResponse rsp = server.query(query);
+    String docText = "";
+    if (rsp.getResults().getNumFound() > 0) {
+      docText = (String) rsp.getResults().get(0).getFieldValue("text");
+    }
+    return docText;
+  }
 
   public String escapeQuery(String term) {
     term = term.replace('?', ' ');
