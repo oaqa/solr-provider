@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
@@ -30,12 +28,10 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
-import org.apache.solr.client.solrj.request.DirectXmlRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
 import org.apache.solr.core.CoreContainer;
+
 public final class SolrWrapper implements Closeable {
 
   private static final String LOCALHOST = "localhost";
@@ -78,6 +74,9 @@ public final class SolrWrapper implements Closeable {
     return server;
   }
 
+  public SolrServer getServer() throws Exception{
+	  return server;
+  }
   private SolrServer createEmbeddedSolrServer(String core) throws Exception {
     System.setProperty("solr.solr.home", core);
     CoreContainer.Initializer initializer = new CoreContainer.Initializer();
@@ -94,22 +93,28 @@ public final class SolrWrapper implements Closeable {
     return rsp.getResults();
   }
 
-	public String getDocText(String id) throws SolrServerException {
-		String q = "id:" + id;
-		SolrQuery query = new SolrQuery();
-		query.setQuery(q);
-		query.setFields("text");
-		
-		QueryResponse rsp = server.query(query);
-		String docText = "";
-		if (rsp.getResults().getNumFound() > 0) {
-			ArrayList<String>results=(ArrayList)rsp.getResults().get(0).getFieldValues("text");
-			docText =  results.get(0);
-		}		
-		return docText;
-	}
+  public SolrDocumentList runQuery(SolrQuery query, int results) throws SolrServerException {
+    QueryResponse rsp = server.query(query);
+    return rsp.getResults();
+  }
 
-  private String escapeQuery(String term) {
+  public String getDocText(String id) throws SolrServerException {
+    String q = "id:" + id;
+    SolrQuery query = new SolrQuery();
+    query.setQuery(q);
+    query.setFields("text");
+    QueryResponse rsp = server.query(query);
+
+    String docText = "";
+    if (rsp.getResults().getNumFound() > 0) {
+      @SuppressWarnings({ "unchecked", "rawtypes" })
+      ArrayList<String> results = (ArrayList) rsp.getResults().get(0).getFieldValues("text");
+      docText = results.get(0);
+    }
+    return docText;
+  }
+
+  public String escapeQuery(String term) {
     term = term.replace('?', ' ');
     term = term.replace('[', ' ');
     term = term.replace(']', ' ');
@@ -123,59 +128,4 @@ public final class SolrWrapper implements Closeable {
       ((EmbeddedSolrServer) server).shutdown();
     }
   }
-  
-  public static void main(String args[]){
-	  try{
-		  SolrWrapper wrapper=new SolrWrapper("http://peace.isri.cs.cmu.edu:9080/solr/genomics-simple/",9080,null,null);
-		  String text=wrapper.getDocText("15342797");
-		  System.out.println(text);
-		  
-	  }catch(Exception e){
-		  e.printStackTrace();
-	  }
-  }
-  
-	public void indexDocument(String docXML) {
-
-		String xml = "<add>" + docXML + "</add>";
-		// System.out.println(xml);
-		DirectXmlRequest xmlreq = new DirectXmlRequest("/update", xml);
-		try {
-			server.request(xmlreq);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-	
-	public SolrServer getServer() {
-		return server;
-	}
-
-
-	public SolrInputDocument makeSolrDocument(HashMap<String, Object> hshMap)
-			throws Exception {
-
-		SolrInputDocument doc = new SolrInputDocument();
-
-		Iterator<String> keys = hshMap.keySet().iterator();
-		while (keys.hasNext()) {
-			String key = keys.next();
-			Object value = hshMap.get(key);
-
-			SolrInputField field = new SolrInputField(key);
-			try {
-				doc.addField(field.getName(), value, 1.0f);
-
-			} catch (Exception e) {
-				e.printStackTrace();
-
-			}
-
-		}
-
-		return doc;
-
-	}
-
 }
