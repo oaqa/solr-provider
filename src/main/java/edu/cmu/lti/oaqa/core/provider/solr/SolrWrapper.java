@@ -20,14 +20,21 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.request.DirectXmlRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.apache.solr.core.CoreContainer;
 public final class SolrWrapper implements Closeable {
 
@@ -43,13 +50,13 @@ public final class SolrWrapper implements Closeable {
       this.server = createEmbeddedSolrServer(core);
       this.embedded = true;
     } else {
-      if (canRunInLocalMode(serverUrl)) {
+      /*if (canRunInLocalMode(serverUrl)) {
         System.err.printf("Running Solr retrieval on local mode\n");
         this.server = createSolrServer(LOCALHOST);
-      } else {
+      } else {*/
         System.err.printf("Running Solr retrieval on remote mode\n");
         this.server = createSolrServer(serverUrl);
-      }
+      //}
     }
   }
 
@@ -83,7 +90,7 @@ public final class SolrWrapper implements Closeable {
     query.setQuery(escapeQuery(q));
     query.setRows(results);
     query.setFields("*", "score");
-    QueryResponse rsp = server.query(query);
+    QueryResponse rsp = server.query(query,METHOD.POST);
     return rsp.getResults();
   }
 
@@ -92,11 +99,13 @@ public final class SolrWrapper implements Closeable {
 		SolrQuery query = new SolrQuery();
 		query.setQuery(q);
 		query.setFields("text");
+		
 		QueryResponse rsp = server.query(query);
 		String docText = "";
 		if (rsp.getResults().getNumFound() > 0) {
-			docText = (String) rsp.getResults().get(0).getFieldValue("text");
-		}
+			ArrayList<String>results=(ArrayList)rsp.getResults().get(0).getFieldValues("text");
+			docText =  results.get(0);
+		}		
 		return docText;
 	}
 
@@ -114,4 +123,59 @@ public final class SolrWrapper implements Closeable {
       ((EmbeddedSolrServer) server).shutdown();
     }
   }
+  
+  public static void main(String args[]){
+	  try{
+		  SolrWrapper wrapper=new SolrWrapper("http://peace.isri.cs.cmu.edu:9080/solr/genomics-simple/",9080,null,null);
+		  String text=wrapper.getDocText("15342797");
+		  System.out.println(text);
+		  
+	  }catch(Exception e){
+		  e.printStackTrace();
+	  }
+  }
+  
+	public void indexDocument(String docXML) {
+
+		String xml = "<add>" + docXML + "</add>";
+		// System.out.println(xml);
+		DirectXmlRequest xmlreq = new DirectXmlRequest("/update", xml);
+		try {
+			server.request(xmlreq);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public SolrServer getServer() {
+		return server;
+	}
+
+
+	public SolrInputDocument makeSolrDocument(HashMap<String, Object> hshMap)
+			throws Exception {
+
+		SolrInputDocument doc = new SolrInputDocument();
+
+		Iterator<String> keys = hshMap.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			Object value = hshMap.get(key);
+
+			SolrInputField field = new SolrInputField(key);
+			try {
+				doc.addField(field.getName(), value, 1.0f);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+
+			}
+
+		}
+
+		return doc;
+
+	}
+
 }
