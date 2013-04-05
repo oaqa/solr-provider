@@ -111,7 +111,7 @@ public final class SolrWrapper implements Closeable {
 		return rsp.getResults();
 	}
 
-	// Added overloaded method for specifying field list
+	/** Added overloaded method for specifying field list**/
 	public SolrDocumentList runQuery(String q, List<String> fieldList,
 			int results) throws SolrServerException {
 		SolrQuery query = new SolrQuery();
@@ -154,7 +154,7 @@ public final class SolrWrapper implements Closeable {
 		}
 	}
 
-	//Building solr document for indexing from key-value pairs
+	/**Building solr document for indexing from key-value pairs**/
 	public SolrInputDocument buildSolrDocument(HashMap<String, Object> hshMap)
 			throws Exception {
 
@@ -179,25 +179,35 @@ public final class SolrWrapper implements Closeable {
 
 	}
 	
-	//Converting SolrInputDocument into XML to post over HTTP for Indexing
+	/**Converting SolrInputDocument into XML to post over HTTP for Indexing**/
 	public String convertSolrDocInXML(SolrInputDocument solrDoc)throws Exception{
 		return ClientUtils.toXML(solrDoc);
 	}
 	
-	//Indexing API for document in xml format 
+	/**Indexing API for document in xml format**/ 
 	public void indexDocument(String docXML) throws Exception {
 
 		String xml = "<add>" + docXML + "</add>";
 		DirectXmlRequest xmlreq = new DirectXmlRequest("/update", xml);
 		server.request(xmlreq);
 	}
+
+	/**Indexing API for document do be indexed in HashMap format**/ 
+	public void indexDocument(HashMap<String,Object>indexMap) throws Exception {
+		SolrInputDocument solrDoc=this.buildSolrDocument(indexMap);
+		String docXML=this.convertSolrDocInXML(solrDoc);
+		String xml = "<add>" + docXML + "</add>";
+		DirectXmlRequest xmlreq = new DirectXmlRequest("/update", xml);
+		server.request(xmlreq);
+	}
+
 	
-	//Commit indexed documents so that it can be searchable immediately
+	/**Commit indexed documents so that it can be searchable immediately**/
 	public void indexCommit() throws Exception {
 		server.commit();
 	}
 	
-	//Delete document from index by query
+	/**Delete document from index by query**/
 	public void deleteDocumentByQuery(String query)throws Exception{
 		
 		server.deleteByQuery(query);
